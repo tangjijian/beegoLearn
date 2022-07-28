@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/beego/beego/v2/server/web"
+	"myproject/models"
 )
 
 type UserController struct {
@@ -42,4 +43,18 @@ func (u *UserController) Get() {
 func (u UserController) Params() {
 	str := fmt.Sprint(u.Ctx.Input.Params())
 	u.Ctx.WriteString(str)
+}
+
+func (u *UserController) Login() {
+	//username := u.GetString("username")
+	//password := u.GetString("password")
+	user := &models.User{Id: 1, Username: "张三", Password: "123456", Role: &models.Role{Id: 2, Name: "role_user"}}
+	err := u.SetSession("user", user)
+	if err != nil {
+		u.Ctx.WriteString(err.Error())
+	}
+	u.Ctx.WriteString("成功")
+}
+func (u UserController) Info() {
+	u.Ctx.WriteString("用户详情")
 }

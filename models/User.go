@@ -1,7 +1,5 @@
 package models
 
-import "github.com/astaxie/beego/orm"
-
 type User struct {
 	// 用户模型
 	Id       int    `orm:"auto;pk" description:"用户序号" json:"uid"`
@@ -11,6 +9,6 @@ type User struct {
 }
 
 // 各种ORM查询方法请自行实现，这里不强调
-func init() {
-	orm.RegisterModel(new(User))
-}
+//func init() {
+//	orm.RegisterModel(new(User))
+//}

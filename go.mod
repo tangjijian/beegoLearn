@@ -13,6 +13,8 @@ require (
 	github.com/casbin/beego-orm-adapter v1.0.0 // indirect
 	github.com/casbin/casbin v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/garyburd/redigo v1.6.3 // indirect
+	github.com/go-redis/redis/v7 v7.4.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect

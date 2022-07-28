@@ -16,7 +16,10 @@ func init() {
 
 // 只有管理员才能注册
 // @router  /register [post]
-func (c *User) Register() {}
+func (c *User) Register() {
+	//user := c.GetString("userP")
+
+}
 
 // 只有用户、管理员才能看到别人或者自己的个人资料
 // 因为管理员继承用户，所以用户能做到的，管理员也可

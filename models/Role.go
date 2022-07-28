@@ -13,10 +13,11 @@ type Role struct {
 }
 
 func init() {
-	orm.RegisterModel(new(Role))
+	//orm.RegisterModel(new(Role))
 	// 这里因为在别的地方已经同步过数据库了，就不同步了
 	RegisterRoles()
 	AddRolesGroupPolicy()
+
 }
 
 var (
@@ -33,6 +34,7 @@ var (
 // 注册角色模型 - 初始化
 func RegisterRoles() {
 	o := orm.NewOrm()
+	o.Using("casbin")
 	// 这里我通过遍历上面构建的一个字典来写入数据库
 	// 如果不愿意使用骚操作的话，直接写三个ReadOrCreate就好了
 	// GetRoleString方法是必须的

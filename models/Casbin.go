@@ -1,12 +1,14 @@
 package models
 
 import (
-	"fmt"
 	"github.com/astaxie/beego/orm"
+	beego "github.com/beego/beego/v2/server/web"
+	beegoormadapter "github.com/casbin/beego-orm-adapter"
 	"github.com/casbin/casbin"
 	_ "github.com/go-sql-driver/mysql"
-	"runtime"
 )
+
+var Enforcer *casbin.Enforcer
 
 type CasbinRule struct {
 	Id    int    // 自增主键
@@ -20,41 +22,48 @@ type CasbinRule struct {
 }
 
 func init() {
-	orm.RegisterDriver("mysql", orm.DRMySQL)
-	err := orm.RegisterDataBase("default", "mysql", "root:root@/go_casbin?charset=utf8")
-	fmt.Println(err)
-	orm.RegisterModel(new(CasbinRule))
+
+	orm.RegisterModel(new(Role))
+	orm.RegisterModel(new(User))
 	// 实际上同步数据库在整个Beego项目中只需要执行一次，如果
 	// 您在别的地方已经同步数据库，这里就不用在执行一次 RunSyncdb
-	_ = orm.RunSyncdb("default", false, false)
-	// 初始化 Casbin
-	RegisterCasbin()
-}
+	a := beegoormadapter.NewAdapter("mysql", "root:root@tcp(127.0.0.1:3306)/")
 
-// 注意，这个Enforcer很重要，Casbin使用都是调用这个变量
-var Enforcer *casbin.Enforcer
+	Enforcer = casbin.NewEnforcer(beego.AppPath+"/conf/casbin.conf", a)
 
-type Adapter struct {
-	o orm.Ormer
-}
-
-func RegisterCasbin() {
-	a := &Adapter{}
-	a.o = orm.NewOrm()
-	// 这个我不知道干嘛的
-	runtime.SetFinalizer(a, finalizer)
-	// Enforcer初始化 - 即传入Adapter对象
-	Enforcer = casbin.NewEnforcer("conf/casbin.conf", a) // 初始化为orm-adapter
-	// Enforcer读取Policy
 	err := Enforcer.LoadPolicy()
 	if err != nil {
 		panic(err)
 	}
+
+	// 初始化 Casbin
+	//RegisterCasbin()
 }
+
+// 注意，这个Enforcer很重要，Casbin使用都是调用这个变量
+
+//
+//type Adapter struct {
+//	o orm.Ormer
+//}
+
+//func RegisterCasbin() {
+//	a := &Adapter{}
+//	a.o = orm.NewOrm()
+//	// 这个我不知道干嘛的
+//	runtime.SetFinalizer(a, finalizer)
+//	// Enforcer初始化 - 即传入Adapter对象
+//	Enforcer = casbin.NewEnforcer("conf/casbin.conf", a) // 初始化为orm-adapter
+//	// Enforcer读取Policy
+//	err := Enforcer.LoadPolicy()
+//	if err != nil {
+//		panic(err)
+//	}
+//}
 
 // finalizer is the destructor for Adapter.
 // 这个函数里面啥都没有，就是这样
-func finalizer(_ *Adapter) {}
+//func finalizer(_ *Adapter) {}
 
 // 注意，方法对应的具体代码要从beego-ORM-Adapter/adapter.go中复制过来
 // 这里方法里面使用的orm操作还是要根据自己的
