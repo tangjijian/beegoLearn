@@ -23,8 +23,7 @@ type CasbinRule struct {
 
 func init() {
 
-	orm.RegisterModel(new(Role))
-	orm.RegisterModel(new(User))
+	orm.RegisterModel(new(Role), new(User), new(Member), new(Post), new(Profile))
 	// 实际上同步数据库在整个Beego项目中只需要执行一次，如果
 	// 您在别的地方已经同步数据库，这里就不用在执行一次 RunSyncdb
 	a := beegoormadapter.NewAdapter("mysql", "root:root@tcp(127.0.0.1:3306)/")

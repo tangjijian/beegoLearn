@@ -1,6 +1,9 @@
 package models
 
-import "github.com/astaxie/beego/orm"
+import (
+	"fmt"
+	"github.com/astaxie/beego/orm"
+)
 
 type User struct {
 	// 用户模型
@@ -20,7 +23,10 @@ func AddOne(u User) string {
 }
 func CreateTable() {
 	o := orm.NewOrm()
-	o.Using("default")
-	_ = orm.RunSyncdb("default", false, true)
+	// default 只能注册一个
+	err := orm.RegisterDataBase("go_casbin", "mysql", "root:root@tcp(127.0.0.1:3306)/go_casbin")
+	fmt.Println(err)
+	o.Using("go_casbin")
+	_ = orm.RunSyncdb("go_casbin", false, true)
 
 }

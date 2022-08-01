@@ -17,6 +17,7 @@ func init() {
 	gob.Register(&models.User{})
 }
 func main() {
+	orm.Debug = true // 开启调试模式
 	pro, _ := session.GetProvider("redis")
 	provider := pro.(*redis.Provider)
 	provider.Password = "12345"
@@ -26,7 +27,7 @@ func main() {
 	beego.InsertFilter("/v1/user/*", beego.BeforeRouter, filters.NewAuthorizer(models.Enforcer)) // 过滤器
 	beego.BConfig.CopyRequestBody = true
 	//beego.BConfig.Listen.EnableAdmin = true
-	orm.RunSyncdb("casbin", false, true) // 同步
+	//orm.RunSyncdb("casbin", false, true) // 同步.
 	//web.Router("api", &controllers.UserController{}, "get:GetUserByID")
 	//创建namespace
 	//ns := web.NewNamespace("/android",
