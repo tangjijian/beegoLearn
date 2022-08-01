@@ -30,7 +30,7 @@ func (u UserController) GetUserByID() {
 	//u.Ctx.WriteString("GetUserByID")
 }
 func (u UserController) UpdateUser() {
-	str := u.Ctx.Input.Param(":splat")
+	str := u.Ctx.Input.Param(":splat") // 获取正则路由 * 的匹配值
 	u.Ctx.WriteString(str)
 }
 func (u UserController) Del() {
@@ -38,7 +38,7 @@ func (u UserController) Del() {
 	u.Ctx.WriteString(username)
 }
 func (u *UserController) Get() {
-	u.Ctx.WriteString(u.Ctx.Input.Param(":path") + "." + u.Ctx.Input.Param(":ext"))
+	u.Ctx.WriteString(u.Ctx.Input.Param(":path") + "." + u.Ctx.Input.Param(":ext")) // 回去URL和后缀
 }
 func (u UserController) Params() {
 	str := fmt.Sprint(u.Ctx.Input.Params())

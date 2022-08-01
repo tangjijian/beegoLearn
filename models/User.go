@@ -1,5 +1,7 @@
 package models
 
+import "github.com/astaxie/beego/orm"
+
 type User struct {
 	// 用户模型
 	Id       int    `orm:"auto;pk" description:"用户序号" json:"uid"`
@@ -12,3 +14,13 @@ type User struct {
 //func init() {
 //	orm.RegisterModel(new(User))
 //}
+
+func AddOne(u User) string {
+	return "1"
+}
+func CreateTable() {
+	o := orm.NewOrm()
+	o.Using("default")
+	_ = orm.RunSyncdb("default", false, true)
+
+}
