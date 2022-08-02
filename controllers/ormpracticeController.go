@@ -84,13 +84,15 @@ func (c *OrmPracticeController) SqlQuery() {
 
 // 关联新增
 func (c *OrmPracticeController) RelationAdd() {
+	profileName := c.GetString("profile_name")
+	memberName := c.GetString("member_name")
 	c.o = orm.NewOrm()
 	c.o.Using("casbin")
 	profile := new(models.Profile)
-	profile.Name = "测试关联"
+	profile.Name = profileName
 	member := new(models.Member)
 	member.PostName = "测试关联"
-	member.Username = "测试关联用户"
+	member.Username = memberName
 	member.Profile = profile
 	// 设置了关联和反向关联，在新增数据时能自动写入关联的id
 	c.o.Insert(profile)
@@ -182,4 +184,77 @@ func (c *OrmPracticeController) DeleteTwo() {
 	} else {
 		c.Ctx.WriteString("Effect lines is " + strconv.FormatInt(i, 10))
 	}
+}
+
+// Expr 概览
+func (c *OrmPracticeController) Expr() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	m := new(models.Member)
+	var member []models.Member
+	qs := c.o.QueryTable(m)
+	qs = qs.Filter("profile__id__gt", 3) // where profile.id > 3
+	_, err := qs.All(&member)
+	if err != nil {
+		c.Ctx.WriteString(err.Error())
+	}
+	c.Ctx.WriteString(fmt.Sprint(member))
+}
+
+// exact/ iexact
+func (c *OrmPracticeController) ExactAndI() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	p := new(models.Profile)
+	qs := c.o.QueryTable(p)
+	qs1 := qs.Filter("name__exact", "测试关联2")
+	qs2 := qs.Filter("name__iexact", "测试关联")     // 不带%的 like查询
+	qs3 := qs.Filter("name__contains", "测试关联a")  // LIKE BINARY 带% %的 like查询 大小写敏感
+	qs4 := qs.Filter("name__icontains", "测试关联a") // LIKE 带% %的 like查询 大小写不敏感
+	qs5 := qs.Filter("name__startswith", "测试关")  // LIKE BINARY 后置% 的 like查询 大小写敏感
+	qs6 := qs.Filter("name__endswith", "a5")     // LIKE BINARY 前置% 的 like查询 大小写敏感
+	var maps []models.Profile
+	qs1.All(&maps)
+	c.Ctx.WriteString(fmt.Sprint(maps))
+	var maps1 []models.Profile
+	qs2.All(&maps1)
+	c.Ctx.WriteString(fmt.Sprint(maps1))
+	var maps2 []models.Profile
+	qs3.All(&maps2)
+	c.Ctx.WriteString(fmt.Sprint(maps2))
+	var maps3 []models.Profile
+	qs4.All(&maps3)
+	c.Ctx.WriteString(fmt.Sprint(maps3))
+	var maps4 []models.Profile
+	qs5.All(&maps4)
+	c.Ctx.WriteString(fmt.Sprint(maps4))
+	var maps5 []models.Profile
+	qs6.All(&maps5)
+	c.Ctx.WriteString(fmt.Sprint(maps5))
+}
+
+// 高级查询
+func (c *OrmPracticeController) FilterAndExclude() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	p := new(models.Profile)
+	qs := c.o.QueryTable(p)
+	qs = qs.Filter("name__contains", "关联").Filter("id__gt", 3).Exclude("id", 4)
+	var maps []models.Profile
+	qs.All(&maps)
+	c.Ctx.WriteString(fmt.Sprint(maps))
+}
+
+// setCond 自定义查询
+func (c *OrmPracticeController) SetCondition() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	p := new(models.Profile)
+	qs := c.o.QueryTable(p)
+	cond := orm.NewCondition()
+	cond1 := cond.And("name__isnull", false).AndNot("id", 3)
+	qs = qs.SetCond(cond1)
+	var maps []models.Profile
+	qs.All(&maps)
+	c.Ctx.WriteString(fmt.Sprint(maps))
 }

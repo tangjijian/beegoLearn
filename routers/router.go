@@ -26,6 +26,13 @@ func init() {
 			beego.NSRouter("/updatetwo", &controllers.OrmPracticeController{}, "post:UpdateTwo"),
 			beego.NSRouter("/deletetwo", &controllers.OrmPracticeController{}, "post:DeleteTwo"),
 		),
+		// 高级查询
+		beego.NSNamespace("/seniorQ",
+			beego.NSRouter("expr", &controllers.OrmPracticeController{}, "post:Expr"),
+			beego.NSRouter("exprexact", &controllers.OrmPracticeController{}, "post:ExactAndI"),
+			beego.NSRouter("filterandexclude", &controllers.OrmPracticeController{}, "post:FilterAndExclude"),
+			beego.NSRouter("setcondition", &controllers.OrmPracticeController{}, "post:SetCondition"),
+		),
 	)
 	beego.AddNamespace(ns)
 	beego.AddNamespace(ns1)
