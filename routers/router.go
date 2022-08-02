@@ -18,6 +18,14 @@ func init() {
 		beego.NSRouter("/relationread", &controllers.OrmPracticeController{}, "post:RelationRead"),
 		beego.NSRouter("/sqlquery", &controllers.OrmPracticeController{}, "post:SqlQuery"),
 		beego.NSRouter("/relationadd", &controllers.OrmPracticeController{}, "post:RelationAdd"),
+		// 嵌套namespace
+		beego.NSNamespace("/curd",
+			beego.NSRouter("/read", &controllers.OrmPracticeController{}, "post:Read"),
+			beego.NSRouter("/readorcreate", &controllers.OrmPracticeController{}, "post:ReadOrCreate"),
+			beego.NSRouter("/insertmulti", &controllers.OrmPracticeController{}, "post:InsertMulti"),
+			beego.NSRouter("/updatetwo", &controllers.OrmPracticeController{}, "post:UpdateTwo"),
+			beego.NSRouter("/deletetwo", &controllers.OrmPracticeController{}, "post:DeleteTwo"),
+		),
 	)
 	beego.AddNamespace(ns)
 	beego.AddNamespace(ns1)

@@ -97,3 +97,89 @@ func (c *OrmPracticeController) RelationAdd() {
 	c.o.Insert(member)
 	c.Ctx.WriteString("新增成功")
 }
+
+/**
+CURD
+*/
+
+// read 通过主键查询
+func (c *OrmPracticeController) Read() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	//m := models.Member{Id: 1}
+	m := models.Member{Username: "管理员"}
+	err := c.o.Read(&m, "Username") // 默认使用主键查询，可以指定第二个参数进行条件查询
+	if err == orm.ErrNoRows {
+		c.Ctx.WriteString("没有数据")
+	} else if err == orm.ErrMissPK {
+		c.Ctx.WriteString("没有默认主键")
+	} else {
+		c.Ctx.WriteString(strconv.Itoa(m.Id) + m.Username + m.CreateTime)
+	}
+}
+
+// readOrCreate
+func (c *OrmPracticeController) ReadOrCreate() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	pass := "123456"
+	h := md5.Sum([]byte(pass))
+	u := models.User{Username: "李四", Password: fmt.Sprintf("%x", h)}
+	created, id, err := c.o.ReadOrCreate(&u, "username")
+	if created {
+		c.Ctx.WriteString("Insert an object Id: " + strconv.Itoa(int(id)))
+	} else if err != nil {
+		c.Ctx.WriteString(err.Error())
+	} else {
+		c.Ctx.WriteString("Get data Id :" + strconv.FormatInt(id, 10))
+	}
+}
+
+// 多行插入
+func (c *OrmPracticeController) InsertMulti() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	pass := "123456"
+	h := md5.Sum([]byte(pass))
+	relP := fmt.Sprintf("%x", h)
+	u := []models.User{
+		{Username: "金财1", Password: relP},
+		{Username: "金财2", Password: relP},
+		{Username: "金财3", Password: relP},
+		{Username: "金财4", Password: relP},
+	}
+	multi, err := c.o.InsertMulti(100, &u)
+	if err != nil {
+		c.Ctx.WriteString("Inserted lines is " + strconv.FormatInt(multi, 10))
+	}
+}
+
+// Update 默认更新所有字段，可以指定更新的字段
+
+func (c *OrmPracticeController) UpdateTwo() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	u := models.User{Id: 3}
+	if c.o.Read(&u) == nil {
+		u.Username = "金财发财了"
+		update, err := c.o.Update(&u)
+		if err != nil {
+			c.Ctx.WriteString(err.Error())
+		} else {
+			c.Ctx.WriteString("Effect lines is " + strconv.FormatInt(update, 10))
+		}
+	}
+}
+
+// Delete 的反向操作
+func (c *OrmPracticeController) DeleteTwo() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	m := models.Member{Id: 114}
+	i, err := c.o.Delete(&m)
+	if err != nil {
+		c.Ctx.WriteString(err.Error())
+	} else {
+		c.Ctx.WriteString("Effect lines is " + strconv.FormatInt(i, 10))
+	}
+}
