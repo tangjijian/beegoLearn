@@ -32,6 +32,18 @@ func init() {
 			beego.NSRouter("exprexact", &controllers.OrmPracticeController{}, "post:ExactAndI"),
 			beego.NSRouter("filterandexclude", &controllers.OrmPracticeController{}, "post:FilterAndExclude"),
 			beego.NSRouter("setcondition", &controllers.OrmPracticeController{}, "post:SetCondition"),
+			beego.NSRouter("sslimit", &controllers.OrmPracticeController{}, "post:IsLimit"),
+			beego.NSRouter("relatedsel", &controllers.OrmPracticeController{}, "post:RelatedSel"),
+			beego.NSRouter("exist", &controllers.OrmPracticeController{}, "post:Exist"),
+			beego.NSRouter("seniorupdate", &controllers.OrmPracticeController{}, "post:SeniorUpdate"),   // 高级更新
+			beego.NSRouter("prepareinsert", &controllers.OrmPracticeController{}, "post:PrepareInsert"), // prepare插入
+			beego.NSRouter("getvalues", &controllers.OrmPracticeController{}, "post:GetValues"),         // Values
+			beego.NSRouter("getvalueslist", &controllers.OrmPracticeController{}, "post:GetValueList"),  // ValuesList
+			beego.NSRouter("getvaluesflag", &controllers.OrmPracticeController{}, "post:GetValueFlag"),  // ValuesFlag
+		),
+		// 关系查询
+		beego.NSNamespace("/relation",
+			beego.NSRouter("/manytoone", &controllers.RelationController{}, "post:ManyToOne"),
 		),
 	)
 	beego.AddNamespace(ns)

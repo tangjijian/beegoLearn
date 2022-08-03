@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"strconv"
+	"time"
 
 	"github.com/beego/beego/v2/server/web"
 	"myproject/models"
@@ -141,19 +142,32 @@ func (c *OrmPracticeController) ReadOrCreate() {
 func (c *OrmPracticeController) InsertMulti() {
 	c.o = orm.NewOrm()
 	c.o.Using("casbin")
-	pass := "123456"
-	h := md5.Sum([]byte(pass))
-	relP := fmt.Sprintf("%x", h)
-	u := []models.User{
-		{Username: "金财1", Password: relP},
-		{Username: "金财2", Password: relP},
-		{Username: "金财3", Password: relP},
-		{Username: "金财4", Password: relP},
+	//pass := "123456"
+	//h := md5.Sum([]byte(pass))
+	//relP := fmt.Sprintf("%x", h)
+	//u := []models.User{
+	//	{Username: "金财1", Password: relP},
+	//	{Username: "金财2", Password: relP},
+	//	{Username: "金财3", Password: relP},
+	//	{Username: "金财4", Password: relP},
+	//}
+	start := time.Now()
+	var users []*models.User
+	str := "123456"
+	h := md5.Sum([]byte(str))
+	for i := 110; i < 159; i++ {
+		user := &models.User{
+			Username: "金财" + strconv.Itoa(i),
+			Password: fmt.Sprintf("%x", h),
+		}
+		users = append(users, user)
 	}
-	multi, err := c.o.InsertMulti(100, &u)
+	multi, err := c.o.InsertMulti(100, &users)
+	end := time.Now().Sub(start)
 	if err != nil {
-		c.Ctx.WriteString("Inserted lines is " + strconv.FormatInt(multi, 10))
+		c.Ctx.WriteString("Inserted lines is " + strconv.FormatInt(multi, 10) + "---耗时:" + end.String())
 	}
+	c.Ctx.WriteString("Inserted lines is " + strconv.FormatInt(multi, 10) + "---耗时:" + end.String())
 }
 
 // Update 默认更新所有字段，可以指定更新的字段
@@ -257,4 +271,125 @@ func (c *OrmPracticeController) SetCondition() {
 	var maps []models.Profile
 	qs.All(&maps)
 	c.Ctx.WriteString(fmt.Sprint(maps))
+}
+
+// limit
+func (c *OrmPracticeController) IsLimit() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	p := new(models.Profile)
+	qs := c.o.QueryTable(p)
+	qs = qs.Limit(2).GroupBy("id").OrderBy("-id")
+	var maps []models.Profile
+	qs.All(&maps)
+	c.Ctx.WriteString(fmt.Sprint(maps))
+}
+
+// RelatedSel 主表不能是反向关联的表，必须是rel模型
+func (c *OrmPracticeController) RelatedSel() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	m := new(models.Member)
+	qs := c.o.QueryTable(m)
+	//qs = qs.RelatedSel()
+	qs = qs.RelatedSel("profile")
+	var maps []models.Member
+	qs.All(&maps)
+	c.Ctx.WriteString(fmt.Sprint(maps))
+}
+
+// Exist
+func (c *OrmPracticeController) Exist() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	m := new(models.Member)
+	qs := c.o.QueryTable(m).Exist()
+	c.Ctx.WriteString(strconv.FormatBool(qs))
+}
+
+// senior update
+func (c *OrmPracticeController) SeniorUpdate() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	p := new(models.User)
+	qs := c.o.QueryTable(p)
+	num, err := qs.Filter("username", "金财发财了").Update(orm.Params{"username": "老实呆着"})
+	if err != nil {
+		c.Ctx.WriteString(err.Error())
+	} else {
+		c.Ctx.WriteString(strconv.Itoa(int(num)))
+	}
+}
+
+// PrepareInsert
+func (c *OrmPracticeController) PrepareInsert() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	u := new(models.User)
+	qs := c.o.QueryTable(u)
+	var users []*models.User
+	str := "123456"
+	h := md5.Sum([]byte(str))
+	for i := 5; i < 55; i++ {
+		user := &models.User{
+			Username: "金财" + strconv.Itoa(i),
+			Password: fmt.Sprintf("%x", h),
+		}
+		users = append(users, user)
+	}
+	i, _ := qs.PrepareInsert()
+	var lines int64
+	start := time.Now()
+	c.o.Begin()
+
+	for _, user := range users {
+		insert, err := i.Insert(user)
+		if err != nil {
+			c.o.Rollback()
+		}
+		lines = insert
+	}
+	c.o.Commit()
+	end := time.Now().Sub(start)
+	c.Ctx.WriteString(strconv.Itoa(int(lines)) + "---耗时：" + end.String())
+}
+
+// values
+func (c *OrmPracticeController) GetValues() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	u := new(models.User)
+	qs := c.o.QueryTable(u)
+	var maps []orm.Params
+	qs.Limit(10).Values(&maps)
+
+	//c.Ctx.WriteString(fmt.Sprint(maps))
+	c.Ctx.JSONResp(maps)
+
+}
+
+// valueList  只返回字段值
+func (c *OrmPracticeController) GetValueList() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	u := new(models.User)
+	qs := c.o.QueryTable(u)
+	var maps []orm.ParamsList
+	qs.Limit(10).ValuesList(&maps)
+
+	//c.Ctx.WriteString(fmt.Sprint(maps))
+	c.Ctx.JSONResp(maps)
+}
+
+// valuesFlag
+func (c *OrmPracticeController) GetValueFlag() {
+	c.o = orm.NewOrm()
+	c.o.Using("casbin")
+	u := new(models.User)
+	qs := c.o.QueryTable(u)
+	var maps orm.ParamsList
+	qs.Limit(10).OrderBy("-id").ValuesFlat(&maps, "username")
+
+	//c.Ctx.WriteString(fmt.Sprint(maps))
+	c.Ctx.JSONResp(maps)
 }
